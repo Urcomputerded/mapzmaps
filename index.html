@@ -57,6 +57,9 @@
     .popup-info b { display:block; margin-bottom:2px; }
     .popup-row { margin-bottom: 4px; }
     .popup-label { font-weight: bold; color: #333; }
+    .popup-btn-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; margin-bottom: 6px; }
+    .popup-btn-row .pill-btn { padding: 6px 12px; font-size: 11px; }
+    .popup-info .status { font-size: 11px; color: #555; display:block; margin-top:2px; }
 
     #confettiContainer {
       pointer-events: none;
@@ -81,11 +84,27 @@
     }
 
     /* --- Checklist tab --- */
+    /* --- Pill button style (shared) --- */
+    .pill-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; border: none; border-radius: 999px;
+      font-family: Arial, sans-serif; font-weight: 700; letter-spacing: 0.3px;
+      cursor: pointer; color: white;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+    }
+    .pill-btn:hover { filter: brightness(1.06); }
+    .pill-btn:active { transform: scale(0.97); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .pill-btn .pill-icon { font-size: 1.05em; line-height: 1; }
+    .pill-blue   { background: #3b5bfd; }
+    .pill-red    { background: #f4534a; }
+    .pill-green  { background: #34a853; }
+    .pill-orange { background: #f5a623; }
+    .pill-white  { background: #ffffff; color: #3b5bfd; border: 1px solid #e3e3e3; }
+
     #toggleChecklistBtn {
       position: fixed; top: 10px; right: 10px; z-index: 10001;
-      background: #0078ff; color: white; border: none;
-      padding: 10px 14px; border-radius: 6px; font-size: 14px;
-      cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      padding: 12px 20px; font-size: 14px;
     }
     #checklistPanel {
       display: none;
@@ -95,30 +114,26 @@
       padding: 55px 12px 12px 12px; box-sizing: border-box;
     }
     #checklistPanel h3 { margin-top: 0; }
-    .checklist-toolbar { display:flex; gap:8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .checklist-toolbar button {
-      flex: 1; padding: 8px; border: none; border-radius: 5px;
-      cursor: pointer; font-size: 13px; color: white;
-    }
-    #setAllLockBtn { background: #d40000; }
-    #setAllUnlockBtn { background: #d48c00; }
-    #resetChecklistBtn { background: #888; }
+    .checklist-toolbar { display:flex; flex-direction: column; gap:10px; margin-bottom: 16px; }
+    .checklist-toolbar .pill-btn { width: 100%; padding: 12px 16px; font-size: 14px; }
     .checklist-item {
-      border: 1px solid #ddd; border-radius: 6px;
-      padding: 8px; margin-bottom: 8px; background: white;
+      border: 1px solid #ddd; border-radius: 12px;
+      padding: 10px; margin-bottom: 10px; background: white;
       transition: background 0.2s, border-color 0.2s;
     }
-    .checklist-item.pending { background: #ffe0e0; border-color: #d40000; }
-    .checklist-item.completed { background: #e4ffe4; border-color: #2e8b2e; }
-    .checklist-item .name { font-weight: bold; display:block; margin-bottom: 6px; }
+    .checklist-item.pending { background: #ffe0e0; border-color: #f4534a; }
+    .checklist-item.completed { background: #e4f8e9; border-color: #34a853; }
+    .checklist-item .name { font-weight: bold; display:block; margin-bottom: 8px; }
     .checklist-item .btn-row { display:flex; gap:6px; margin-bottom:4px; flex-wrap: wrap; }
-    .checklist-item button {
-      padding: 5px 8px; font-size: 12px; border: 1px solid #999;
-      border-radius: 4px; background: #f0f0f0; cursor: pointer;
+    .checklist-item .pill-btn { padding: 7px 14px; font-size: 12px; }
+    .checklist-item button.lockBtn { background: #f0f0f0; color: #333; }
+    .checklist-item button.unlockBtn { background: #f0f0f0; color: #333; }
+    .checklist-item button.lockBtn.active { background:#f4534a; color:white; }
+    .checklist-item button.unlockBtn.active { background:#f5a623; color:white; }
+    .checklist-item button.doneBtn { background:#34a853; color:white; }
+    .checklist-item button.doneBtn:disabled {
+      background:#e0e0e0; color:#999; cursor:not-allowed; box-shadow:none;
     }
-    .checklist-item button.lockBtn.active { background:#d40000; color:white; border-color:#d40000; }
-    .checklist-item button.unlockBtn.active { background:#d48c00; color:white; border-color:#d48c00; }
-    .checklist-item button.doneBtn { background:#2e8b2e; color:white; border-color:#2e8b2e; }
     .checklist-item .status { font-size: 11px; color: #555; display:block; margin-top:2px; }
   </style>
 </head>
@@ -131,13 +146,13 @@
   <div id="map"></div>
   <div id="confettiContainer"></div>
 
-  <button id="toggleChecklistBtn">📋 Checklist</button>
+  <button id="toggleChecklistBtn" class="pill-btn pill-white"><span class="pill-icon">☰</span> Checklist</button>
   <div id="checklistPanel">
     <h3>Unarming Checklist</h3>
     <div class="checklist-toolbar">
-      <button id="setAllLockBtn">🔒 Set All Lock</button>
-      <button id="setAllUnlockBtn">🔓 Set All Unlock</button>
-      <button id="resetChecklistBtn">↺ Reset All</button>
+      <button id="setAllLockBtn" class="pill-btn pill-red"><span class="pill-icon">🔒</span> Set All Lock</button>
+      <button id="setAllUnlockBtn" class="pill-btn pill-orange"><span class="pill-icon">🔓</span> Set All Unlock</button>
+      <button id="resetChecklistBtn" class="pill-btn pill-blue"><span class="pill-icon">↺</span> Reset All</button>
     </div>
     <div id="checklistItems"></div>
   </div>
@@ -251,12 +266,26 @@
     }
 
     function buildPopupContent(building) {
+      const status = checklistStatus[building.name];
+      const showDone = status.marked && !status.done;
+
+      let statusText = 'Not actioned';
+      if (status.marked && !status.done) statusText = 'Pending: ' + (status.marked === 'lock' ? 'Lock' : 'Unlock') + ' — click Done';
+      if (status.done) statusText = 'Completed: ' + (status.marked === 'lock' ? 'Locked' : 'Unlocked') + (status.timestamp ? ' at ' + status.timestamp : '');
+
+      const safeName = building.name.replace(/'/g, "\\'");
+
       return `
         <div class="popup-info">
           <b>${building.name}</b>
           <div class="popup-row"><span class="popup-label">Alarm Panel: </span>${building.alarmPanel}</div>
           <div class="popup-row"><span class="popup-label">Entry/Exit: </span>${building.entryExit}</div>
           <div class="popup-row"><span class="popup-label">Opening Hours: </span>${building.hours}</div>
+          ${showDone ? `
+          <div class="popup-row popup-btn-row">
+            <button class="pill-btn pill-green doneBtn" onclick="completeBuildingFromPopup('${safeName}')"><span class="pill-icon">✔</span> Done</button>
+          </div>` : ''}
+          <span class="status">${statusText}</span>
         </div>
       `;
     }
@@ -353,12 +382,13 @@
         if (status.marked && !status.done) statusText = 'Pending: ' + (status.marked === 'lock' ? 'Lock' : 'Unlock') + ' — click Done';
         if (status.done) statusText = 'Completed: ' + (status.marked === 'lock' ? 'Locked' : 'Unlocked') + (status.timestamp ? ' at ' + status.timestamp : '');
 
+        const doneDisabled = !(status.marked && !status.done);
         row.innerHTML = `
           <span class="name">${building.name}</span>
           <div class="btn-row">
-            <button class="lockBtn ${status.marked==='lock' && !status.done ? 'active' : ''}">Lock</button>
-            <button class="unlockBtn ${status.marked==='unlock' && !status.done ? 'active' : ''}">Unlock</button>
-            ${ (status.marked && !status.done) ? '<button class="doneBtn">Done ✓</button>' : '' }
+            <button class="pill-btn lockBtn ${status.marked==='lock' && !status.done ? 'active' : ''}"><span class="pill-icon">🔒</span> Lock</button>
+            <button class="pill-btn unlockBtn ${status.marked==='unlock' && !status.done ? 'active' : ''}"><span class="pill-icon">🔓</span> Unlock</button>
+            <button class="pill-btn doneBtn" ${doneDisabled ? 'disabled' : ''}><span class="pill-icon">✔</span> Done</button>
           </div>
           <span class="status">${statusText}</span>
         `;
@@ -379,12 +409,19 @@
       if (marker) marker.setIcon(buildLabelIcon(name, isRed));
     }
 
+    function updatePopupContent(name) {
+      const marker = markersByName[name];
+      const building = buildings.find(b => b.name === name);
+      if (marker && building) marker.setPopupContent(buildPopupContent(building));
+    }
+
     function markBuilding(name, action) {
       const status = checklistStatus[name];
       status.marked = action;
       status.done = false;
       status.timestamp = null;
       updateMarkerColor(name);
+      updatePopupContent(name);
       renderChecklist();
     }
 
@@ -393,14 +430,19 @@
       status.done = true;
       status.timestamp = new Date().toLocaleTimeString();
       updateMarkerColor(name);
+      updatePopupContent(name);
       renderChecklist();
     }
+
+    // Allow the Done button inside the map popup to drive the same state
+    window.completeBuildingFromPopup = function(name) { completeBuilding(name); };
 
     resetChecklistBtn.addEventListener('click', () => {
       if (!confirm('Reset the checklist for all buildings?')) return;
       buildings.forEach(b => {
         checklistStatus[b.name] = { marked: null, done: false, timestamp: null };
         updateMarkerColor(b.name);
+        updatePopupContent(b.name);
       });
       renderChecklist();
     });
@@ -409,6 +451,7 @@
       buildings.forEach(b => {
         checklistStatus[b.name] = { marked: action, done: false, timestamp: null };
         updateMarkerColor(b.name);
+        updatePopupContent(b.name);
       });
       renderChecklist();
     }
@@ -417,231 +460,6 @@
     setAllUnlockBtn.addEventListener('click', () => setAll('unlock'));
 
     renderChecklist();
-  </script>
-</body>
-</html>
-
-    }
-    .pulse-circle {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: rgba(255, 0, 0, 0.6);
-      border: 3px solid red;
-      animation: pulse 3s infinite;
-      box-shadow: 0 0 8px 3px rgba(255,0,0,0.7);
-      pointer-events: none; user-select: none;
-    }
-
-    html, body { height: 100%; margin: 0; }
-    #map { height: 100vh; display: block; }
-    .label-icon {
-      background-color: #0078ff; color: white; padding: 2px 6px;
-      border-radius: 4px; font-size: 12px; font-weight: bold;
-      border: 1px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.5);
-      white-space: nowrap;
-    }
-    .live-location-marker {
-      background: rgba(255, 0, 0, 0.8);
-      border-radius: 50%; width: 16px; height: 16px;
-      border: 2px solid white;
-      box-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
-    }
-
-    #buildingSelect {
-      width: 220px; margin: 10px auto;
-      font-size: 16px; padding: 5px;
-      border-radius: 5px; border: 1px solid #ccc;
-      text-align-last: center; display: block;
-      font-family: Arial, sans-serif;
-    }
-
-    #confettiContainer {
-      pointer-events: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 10000;
-      overflow: visible;
-      display: none;
-    }
-    .confetti {
-      position: absolute;
-      font-size: 24px;
-      animation-name: fall;
-      animation-timing-function: linear;
-      animation-iteration-count: 1;
-      opacity: 0.9;
-      user-select: none;
-    }
-    @keyframes fall {
-      0% { transform: translateY(-30px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-    }
-  </style>
-</head>
-<body>
-
-  <select id="buildingSelect">
-    <option value="">Select a building</option>
-  </select>
-
-  <div id="map"></div>
-  <div id="confettiContainer"></div>
-
-  <script>
-    const map = L.map('map').setView([-32.055, 115.7435], 16);
-    map.options.minZoom = 16;
-    map.options.maxZoom = 22;
-    
-    // --- Free OpenStreetMap Layer ---
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-      maxZoom: 22
-    }).addTo(map);
-
-    const buildings = [
-      { name: "ND48", coords: [-32.05406995747874, 115.7443606545727] },
-      { name: "ND49", coords: [-32.054025, 115.743894] },
-      { name: "ND50", coords: [-32.054300, 115.743997] },
-      { name: "Entry", coords: [-32.053928, 115.743659] },
-      { name: "ND46 ⚕️", coords: [-32.054379, 115.743572] },
-      { name: "ND40 ⚕️", coords: [-32.05443275527898, 115.74337488031232] },
-      { name: "ND37 ⚕️", coords: [-32.054977444754684, 115.74276781198407] },
-      { name: "ND43 101 ⚕️", coords: [-32.054991, 115.743039] },
-      { name: "ND36 Gate ⛿", coords: [-32.05436342389399, 115.74326557690927] },
-      { name: "ND36 ⚖️", coords: [-32.054665771306304, 115.74309391553228] },
-      { name: "ND42", coords: [-32.05546818031207, 115.74249060336143] },
-      { name: "ND32", coords: [-32.05562471813233, 115.74225350353332] },
-      { name: "ND33", coords: [-32.05584260141241, 115.74262620385835] },
-      { name: "ND19", coords: [-32.05543656663422, 115.74289369651001] },
-      { name: "ND31", coords: [-32.055333, 115.743174] },
-      { name: "Enzo’s ✂️", coords: [-32.055388569075326, 115.74314783581423] },
-      { name: "ND28 Gate ⛿", coords: [-32.05511066174629, 115.74320013889003] },
-      { name: "ND28", coords: [-32.05527092742327, 115.74335101314716] },
-      { name: "ND23 Gate ⛿", coords: [-32.055786, 115.743283] },
-      { name: "ND23", coords: [-32.055651653392324, 115.74321971166759] },
-      { name: "ND1", coords: [-32.056016394932236, 115.74330731440126] },
-      { name: "ND2", coords: [-32.056298, 115.743458] },
-      { name: "ND3", coords: [-32.05652262687087, 115.74355544412231] },
-      { name: "ND4", coords: [-32.056684951906085, 115.74304759933608] },
-      { name: "ND6", coords: [-32.05584230974208, 115.74362360792577] },
-      { name: "ND24", coords: [-32.05680316004233, 115.74358806445255] },
-      { name: "ND25", coords: [-32.056918257011624, 115.74362756870676] },
-      { name: "ND22", coords: [-32.057130803688196, 115.7437469270079] },
-      { name: "Chapel ✝️", coords: [-32.0566177221772, 115.74393254866074] },
-      { name: "UP1 🅿️", coords: [-32.05689722964096, 115.7440238650887] },
-      { name: "UP2 🅿️", coords: [-32.057007, 115.743194] },
-      { name: "UP3 🅿️", coords: [-32.056646, 115.743212] },
-      { name: "UP4 🅿️", coords: [-32.055933, 115.742335] },
-      { name: "UP5 🅿️", coords: [-32.055860, 115.743190] },
-      { name: "UP7 🅿️", coords: [-32.054592, 115.743619] },
-
-      { name: "Batman Courtyard", coords: [-32.056481, 115.744092] },
-      { name: "ND9", coords: [-32.056688459509985, 115.74418314143297] },
-      { name: "ND10 Bathrooms", coords: [-32.0565021398294, 115.74423381384271] },
-      { name: "ND11", coords: [-32.056571, 115.744268] },
-      { name: "ND13", coords: [-32.05659135041864, 115.74442519596545] },
-      { name: "ND7📚", coords: [-32.0563039323053, 115.74381046334626] },
-      { name: "ND17📚", coords: [-32.056171827789534, 115.74423799508918] },
-      { name: "ND16", coords: [-32.05633507438695, 115.74427751676245] },
-      { name: "ND39", coords: [-32.05631006870412, 115.74446661249807] },
-      { name: "ND14", coords: [-32.05663983457753, 115.74462121895584] },
-      { name: "ND34", coords: [-32.056457415816624, 115.74454091059914] },
-      { name: "ND12", coords: [-32.05690841781582, 115.74447974560812] },
-      { name: "ND35", coords: [-32.05608981784427, 115.74466741507653] },
-      { name: "ND38", coords: [-32.05590927639184, 115.74432587242015] },
-      { name: "ND21", coords: [-32.05581759497825, 115.74417455365061] },
-      { name: "ND18", coords: [-32.05567408646864, 115.74419924199545] }
-    ];
-
-    // Sort buildings by number
-    buildings.sort((a,b) => {
-      const numA = parseInt(a.name.match(/\d+/)?.[0] || 0,10);
-      const numB = parseInt(b.name.match(/\d+/)?.[0] || 0,10);
-      return numA - numB;
-    });
-
-    const buildingSelect = document.getElementById('buildingSelect');
-
-    // Populate dropdown
-    buildings.forEach(building => {
-      const option = document.createElement('option');
-      option.value = JSON.stringify(building.coords);
-      option.textContent = building.name;
-      buildingSelect.appendChild(option);
-    });
-
-    // Add building markers
-    buildings.forEach(building => {
-      const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${building.coords[0]},${building.coords[1]}`;
-      const labelIcon = L.divIcon({
-        className: 'label-icon',
-        html: building.name,
-        iconSize: [60,20],
-        iconAnchor: [30,10]
-      });
-      L.marker(building.coords, { icon: labelIcon })
-        .addTo(map)
-         .bindPopup(`<strong>${building.name}</strong>`)
-    });
-
-    const pulseIcon = L.divIcon({
-      className: '',
-      html: '<div class="pulse-circle"></div>',
-      iconSize: [30,30],
-      iconAnchor: [15,15]
-    });
-
-    let pulseMarker = null;
-    buildingSelect.addEventListener('change', () => {
-      const value = buildingSelect.value;
-      if (!value) return;
-      const coords = JSON.parse(value);
-      map.setView(coords, 18);
-      if (pulseMarker) map.removeLayer(pulseMarker);
-      pulseMarker = L.marker(coords, { icon: pulseIcon }).addTo(map);
-      setTimeout(()=>{ if(pulseMarker) map.removeLayer(pulseMarker); pulseMarker=null; }, 3000);
-    });
-
-    // Live location
-    let liveMarker = null;
-    const liveLocationIcon = L.divIcon({ className: 'live-location-marker' });
-    function onLocationFound(e) {
-      const latlng = e.latlng;
-      if (!liveMarker) liveMarker = L.marker(latlng, { icon: liveLocationIcon }).addTo(map);
-      else liveMarker.setLatLng(latlng);
-    }
-    function onLocationError(e) { console.log("Location error: "+e.message); }
-
-    map.locate({ watch:true, setView:false, enableHighAccuracy:true });
-    map.on('locationfound', onLocationFound);
-    map.on('locationerror', onLocationError);
-
-    // Routing
-    let routingControl = null;
-    buildingSelect.addEventListener('change', ()=>{
-      if(routingControl){ routingControl.remove(); routingControl=null; }
-      const value = buildingSelect.value;
-      if(!value || !liveMarker) return;
-      const start = liveMarker.getLatLng();
-      const endCoords = JSON.parse(value);
-      const end = L.latLng(endCoords[0], endCoords[1]);
-      routingControl = L.Routing.control({
-        waypoints: [start,end],
-        router: L.Routing.osrmv1({
-          serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
-          profile: 'foot'
-        }),
-        lineOptions:{ styles:[{color:'blue', opacity:0.6, weight:6}] },
-        createMarker: ()=>null,
-        addWaypoints:false,
-        routeWhileDragging:false,
-        fitSelectedRoutes:true,
-        showAlternatives:false,
-        collapsible:true,
-        autoRoute:true,
-        show:false,
-        useZoomParameter:true
-      }).addTo(map);
-    });
   </script>
 </body>
 </html>
